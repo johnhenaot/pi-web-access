@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- `"toolActivation": "none"` with `"toolExposure": "deferred"` drops `web_enable`, so the web tools are reached only from Pi `codemode` scripts or `tool_search` and cost no tool declarations until a script calls them. It requires deferred exposure. The other `toolActivation` values work as before.
+
 ## [0.43.0] - 2026-10-20
 
 ### Highlights
