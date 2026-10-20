@@ -187,7 +187,10 @@ test("none activation leaves deferred web tools to codemode scripts without web_
 		faux.setResponses([
 			(context) => {
 				captureRequest(context);
-				return fauxAssistantMessage(fauxToolCall("codemode", { code: "return ALL_TOOLS.map(tool => tool.name);" }), { stopReason: "toolUse" });
+				return fauxAssistantMessage(fauxToolCall("codemode", {
+					// An unknown responseId answers offline, so the call proves the tool runs without web_enable.
+					code: "let call; try { call = await tools.get_search_content({ responseId: 'missing' }); } catch (error) { call = error.message; } return { names: ALL_TOOLS.map(tool => tool.name), call };",
+				}), { stopReason: "toolUse" });
 			},
 			(context) => {
 				captureRequest(context);
@@ -201,8 +204,9 @@ test("none activation leaves deferred web tools to codemode scripts without web_
 		session.dispose();
 		return requests;
 	});
-	assert.deepEqual(requests[0].tools.map(tool => tool.name), ["codemode"]);
+	for (const request of requests) assert.deepEqual(request.tools.map(tool => tool.name), ["codemode"]);
 	for (const name of deferredWebTools) assert.match(scriptResult, new RegExp(name));
+	assert.match(scriptResult, /No stored results for responseId/);
 });
 
 test("Pi's tool_search finds and loads a deferred web tool", async () => {
